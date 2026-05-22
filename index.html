@@ -262,6 +262,9 @@ body {
   padding: 4px 0 8px;
   text-align: center;
   min-height: 60px;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
 }
 .lyric-line {
   font-size: 16px;
@@ -814,13 +817,14 @@ body {
   }, { passive: true });
   lyricsSection.addEventListener('touchmove', (e) => {
     if (!lyricsSwiping) return;
+    e.preventDefault();
     const deltaY = lyricsTouchStartY - e.touches[0].clientY;
-    if (Math.abs(deltaY) > 15) {
-      const step = 5;
+    if (Math.abs(deltaY) > 10) {
+      const step = 3;
       audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + (deltaY > 0 ? step : -step)));
       lyricsTouchStartY = e.touches[0].clientY;
     }
-  }, { passive: true });
+  }, { passive: false });
   lyricsSection.addEventListener('touchend', () => { lyricsSwiping = false; });
 
   let liked = false;
