@@ -805,18 +805,37 @@ body {
 
   // Progress bar drag
   let isDragging = false;
-  function seekFromEvent(e) {
+  let dragPct = 0;
+  let dragRaf = null;
+  function getPct(e) {
     const rect = progressBar.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    audio.currentTime = pct * audio.duration;
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   }
-  progressBar.addEventListener('mousedown', (e) => { isDragging = true; seekFromEvent(e); });
-  progressBar.addEventListener('touchstart', (e) => { isDragging = true; seekFromEvent(e); }, { passive: true });
-  document.addEventListener('mousemove', (e) => { if (isDragging) seekFromEvent(e); });
-  document.addEventListener('touchmove', (e) => { if (isDragging) seekFromEvent(e); }, { passive: true });
-  document.addEventListener('mouseup', () => { isDragging = false; });
-  document.addEventListener('touchend', () => { isDragging = false; });
+  function applyDrag() {
+    if (!isDragging) return;
+    progressFill.style.width = (dragPct * 100) + '%';
+    const d = audio.duration || 1;
+    currentTimeEl.textContent = formatTime(dragPct * d);
+  }
+  function onDragMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    dragPct = getPct(e);
+    if (dragRaf) cancelAnimationFrame(dragRaf);
+    dragRaf = requestAnimationFrame(applyDrag);
+  }
+  function onDragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    audio.currentTime = dragPct * (audio.duration || 0);
+  }
+  progressBar.addEventListener('mousedown', (e) => { isDragging = true; dragPct = getPct(e); applyDrag(); });
+  progressBar.addEventListener('touchstart', (e) => { isDragging = true; dragPct = getPct(e); applyDrag(); }, { passive: true });
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('touchmove', onDragMove, { passive: false });
+  document.addEventListener('mouseup', onDragEnd);
+  document.addEventListener('touchend', onDragEnd);
 
   // Lyrics swipe to seek
   const lyricsSection = document.querySelector('.lyrics-section');
