@@ -585,12 +585,11 @@ body {
       <div class="lyric-line next" id="lyricNext"></div>
     </div>
 
-    <!-- Calibration mode -->
-    <div id="calibPanel" style="display:none;margin:8px 0;">
-      <div style="display:flex;gap:6px;flex-wrap:wrap;max-height:200px;overflow-y:auto;" id="calibList"></div>
-      <div id="calibLog" style="margin-top:8px;font-size:12px;color:var(--accent);min-height:20px;word-break:break-all;"></div>
+    <!-- Calibration mode (hidden) -->
+    <div id="calibPanel" style="display:none;">
+      <div id="calibList"></div>
+      <div id="calibLog"></div>
     </div>
-    <button class="ctrl-btn" id="calibBtn" style="width:auto;padding:0 12px;height:28px;font-size:11px;margin-bottom:8px;">校准模式</button>
 
     <!-- Progress -->
     <div class="progress-section">
@@ -1022,49 +1021,6 @@ body {
 
   renderComments();
 
-  // Calibration mode
-  const calibBtn = document.getElementById('calibBtn');
-  const calibPanel = document.getElementById('calibPanel');
-  const calibList = document.getElementById('calibList');
-  const calibLog = document.getElementById('calibLog');
-  let calibMode = false;
-
-  calibBtn.addEventListener('click', () => {
-    calibMode = !calibMode;
-    calibPanel.style.display = calibMode ? 'block' : 'none';
-    calibBtn.textContent = calibMode ? '退出校准' : '校准模式';
-    if (calibMode) renderCalibList();
-  });
-
-  function renderCalibList() {
-    calibList.innerHTML = '';
-    lyrics.forEach((l, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'ctrl-btn';
-      btn.style.cssText = 'width:auto;padding:4px 10px;height:26px;font-size:11px;';
-      btn.textContent = l.text.substring(0, 8) + (l.text.length > 8 ? '...' : '');
-      btn.addEventListener('click', () => {
-        const t = audio.currentTime;
-        lyrics[i].time = Math.round(t * 10) / 10;
-        calibLog.textContent = `"${l.text}" → ${formatTime(t)} (${t.toFixed(1)}s)`;
-        renderCalibList();
-      });
-      calibList.appendChild(btn);
-    });
-    // Export button
-    const expBtn = document.createElement('button');
-    expBtn.className = 'ctrl-btn';
-    expBtn.style.cssText = 'width:auto;padding:4px 10px;height:26px;font-size:11px;color:var(--accent);';
-    expBtn.textContent = '复制歌词';
-    expBtn.addEventListener('click', () => {
-      const arr = lyrics.map(l => `    { time: ${l.time}, text: '${l.text}' }`).join(',\n');
-      const code = `const lyrics = [\n${arr},\n];`;
-      navigator.clipboard.writeText(code).then(() => {
-        calibLog.textContent = '已复制到剪贴板！替换 index.html 中的 lyrics 数组即可';
-      });
-    });
-    calibList.appendChild(expBtn);
-  }
 })();
 </script>
 </body>
