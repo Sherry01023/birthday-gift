@@ -789,11 +789,39 @@ body {
 
   playBtn.addEventListener('click', togglePlay);
 
-  progressBar.addEventListener('click', (e) => {
+  // Progress bar drag
+  let isDragging = false;
+  function seekFromEvent(e) {
     const rect = progressBar.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     audio.currentTime = pct * audio.duration;
-  });
+  }
+  progressBar.addEventListener('mousedown', (e) => { isDragging = true; seekFromEvent(e); });
+  progressBar.addEventListener('touchstart', (e) => { isDragging = true; seekFromEvent(e); }, { passive: true });
+  document.addEventListener('mousemove', (e) => { if (isDragging) seekFromEvent(e); });
+  document.addEventListener('touchmove', (e) => { if (isDragging) seekFromEvent(e); }, { passive: true });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+  document.addEventListener('touchend', () => { isDragging = false; });
+
+  // Lyrics swipe to seek
+  const lyricsSection = document.querySelector('.lyrics-section');
+  let lyricsTouchStartY = 0;
+  let lyricsSwiping = false;
+  lyricsSection.addEventListener('touchstart', (e) => {
+    lyricsTouchStartY = e.touches[0].clientY;
+    lyricsSwiping = true;
+  }, { passive: true });
+  lyricsSection.addEventListener('touchmove', (e) => {
+    if (!lyricsSwiping) return;
+    const deltaY = lyricsTouchStartY - e.touches[0].clientY;
+    if (Math.abs(deltaY) > 15) {
+      const step = 5;
+      audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + (deltaY > 0 ? step : -step)));
+      lyricsTouchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  lyricsSection.addEventListener('touchend', () => { lyricsSwiping = false; });
 
   let liked = false;
   heartBtn.addEventListener('click', () => {
