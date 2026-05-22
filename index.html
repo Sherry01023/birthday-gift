@@ -66,32 +66,32 @@ body {
   height: min(80vw, 340px);
 }
 
-/* Music notes floating around */
-.music-notes {
+/* Sound wave rings */
+.sound-waves {
   position: absolute;
-  inset: -50px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
 }
-.music-note {
+.wave-ring {
   position: absolute;
-  font-size: 28px;
-  color: var(--accent);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
   opacity: 0;
-  animation: noteFloat 3s ease-in-out infinite;
+  animation: wavePulse 3s ease-out infinite;
 }
-.music-note:nth-child(1) { top: 0; left: 5%; animation-delay: 0s; }
-.music-note:nth-child(2) { top: -5%; right: 15%; animation-delay: 0.6s; }
-.music-note:nth-child(3) { bottom: 5%; left: 0; animation-delay: 1.2s; }
-.music-note:nth-child(4) { bottom: -5%; right: 10%; animation-delay: 1.8s; }
-.music-note:nth-child(5) { top: 45%; left: -8%; animation-delay: 2.4s; }
-.music-note:nth-child(6) { top: 40%; right: -8%; animation-delay: 0.3s; }
-@keyframes noteFloat {
-  0% { opacity: 0; transform: translateY(10px) rotate(-15deg) scale(0.7); }
-  25% { opacity: 0.8; }
-  50% { opacity: 1; transform: translateY(-8px) rotate(10deg) scale(1.1); }
-  75% { opacity: 0.6; }
-  100% { opacity: 0; transform: translateY(-20px) rotate(-5deg) scale(0.8); }
+.wave-ring:nth-child(1) { width: 105%; height: 105%; animation-delay: 0s; }
+.wave-ring:nth-child(2) { width: 115%; height: 115%; animation-delay: 0.7s; }
+.wave-ring:nth-child(3) { width: 125%; height: 125%; animation-delay: 1.4s; }
+.wave-ring:nth-child(4) { width: 135%; height: 135%; animation-delay: 2.1s; }
+@keyframes wavePulse {
+  0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.95); }
+  50% { opacity: 0.2; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.05); }
 }
 
 /* Vinyl record */
@@ -544,13 +544,11 @@ body {
   <!-- Turntable -->
   <div class="turntable-section">
     <div class="turntable">
-      <div class="music-notes">
-        <div class="music-note">&#9835;</div>
-        <div class="music-note">&#9834;</div>
-        <div class="music-note">&#9833;</div>
-        <div class="music-note">&#9839;</div>
-        <div class="music-note">&#9835;</div>
-        <div class="music-note">&#9834;</div>
+      <div class="sound-waves">
+        <div class="wave-ring"></div>
+        <div class="wave-ring"></div>
+        <div class="wave-ring"></div>
+        <div class="wave-ring"></div>
       </div>
       <div class="vinyl" id="vinyl">
         <div class="vinyl-center">
