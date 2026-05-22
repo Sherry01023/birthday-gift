@@ -712,14 +712,14 @@ body {
     { time: 20, text: '旧城的光落在肩上' },
     { time: 23, text: '谁都没想过后来会认真' },
     { time: 30, text: '那时候我还不知道' },
-    { time: 31, text: '故事会走多远' },
+    { time: 32, text: '故事会走多远' },
     { time: 38, text: '我们去过很多地方' },
     { time: 41, text: '欧洲的风和车窗' },
     { time: 46, text: '把陪伴拉得很长' },
     { time: 51, text: '有些风景会慢慢淡去' },
-    { time: 55, text: '有些日子会变成回忆' },
+    { time: 56, text: '有些日子会变成回忆' },
     { time: 60, text: '但有人一起走过的时间' },
-    { time: 63, text: '会留下痕迹' },
+    { time: 64, text: '会留下痕迹' },
     { time: 66, text: '今天想对你说' },
     { time: 71, text: '生日快乐' },
     { time: 76, text: '生日快乐' },
@@ -851,7 +851,19 @@ body {
     if (!isDragging) return;
     progressFill.style.width = (dragPct * 100) + '%';
     const d = audio.duration || 1;
-    currentTimeEl.textContent = formatTime(dragPct * d);
+    const t = dragPct * d;
+    currentTimeEl.textContent = formatTime(t);
+    // Update lyrics in sync during drag
+    let idx = -1;
+    for (let i = lyrics.length - 1; i >= 0; i--) {
+      if (t >= lyrics[i].time) { idx = i; break; }
+    }
+    if (idx !== lyricIdx) {
+      lyricIdx = idx;
+      document.getElementById('lyricPrev').textContent = idx > 0 ? lyrics[idx - 1]?.text : '';
+      document.getElementById('lyricCurrent').textContent = lyrics[idx]?.text || '...';
+      document.getElementById('lyricNext').textContent = idx < lyrics.length - 1 ? lyrics[idx + 1]?.text : '';
+    }
   }
   function onDragMove(e) {
     if (!isDragging) return;
