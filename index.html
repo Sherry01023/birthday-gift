@@ -62,8 +62,35 @@ body {
 /* Turntable base */
 .turntable {
   position: relative;
-  width: min(70vw, 300px);
-  height: min(70vw, 300px);
+  width: min(80vw, 340px);
+  height: min(80vw, 340px);
+}
+
+/* Music notes floating around */
+.music-notes {
+  position: absolute;
+  inset: -30px;
+  pointer-events: none;
+  z-index: 0;
+}
+.music-note {
+  position: absolute;
+  font-size: 18px;
+  opacity: 0;
+  animation: noteFloat 4s ease-in-out infinite;
+}
+.music-note:nth-child(1) { top: 5%; left: 0; animation-delay: 0s; }
+.music-note:nth-child(2) { top: 0; right: 10%; animation-delay: 0.8s; }
+.music-note:nth-child(3) { bottom: 10%; left: 5%; animation-delay: 1.6s; }
+.music-note:nth-child(4) { bottom: 0; right: 5%; animation-delay: 2.4s; }
+.music-note:nth-child(5) { top: 40%; left: -5%; animation-delay: 3.2s; }
+.music-note:nth-child(6) { top: 35%; right: -5%; animation-delay: 1.2s; }
+@keyframes noteFloat {
+  0% { opacity: 0; transform: translateY(8px) scale(0.8); }
+  20% { opacity: 0.6; }
+  50% { opacity: 0.8; transform: translateY(-12px) scale(1); }
+  80% { opacity: 0.5; }
+  100% { opacity: 0; transform: translateY(-25px) scale(0.7); }
 }
 
 /* Vinyl record */
@@ -516,6 +543,14 @@ body {
   <!-- Turntable -->
   <div class="turntable-section">
     <div class="turntable">
+      <div class="music-notes">
+        <div class="music-note">&#9835;</div>
+        <div class="music-note">&#9834;</div>
+        <div class="music-note">&#9833;</div>
+        <div class="music-note">&#9839;</div>
+        <div class="music-note">&#9835;</div>
+        <div class="music-note">&#9834;</div>
+      </div>
       <div class="vinyl" id="vinyl">
         <div class="vinyl-center">
           <img src="photos/special.jpg" alt="cover" id="albumImg">
