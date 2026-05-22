@@ -841,6 +841,7 @@ body {
   let isDragging = false;
   let dragPct = 0;
   let dragRaf = null;
+  let startX = 0, startY = 0, dragDecided = false, isVerticalScroll = false;
   function getPct(e) {
     const rect = progressBar.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -854,6 +855,21 @@ body {
   }
   function onDragMove(e) {
     if (!isDragging) return;
+    if (!dragDecided) {
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      if (Math.abs(cy - startY) > Math.abs(cx - startX) && Math.abs(cy - startY) > 5) {
+        isVerticalScroll = true;
+        dragDecided = true;
+        isDragging = false;
+        return;
+      }
+      if (Math.abs(cx - startX) > 5) {
+        dragDecided = true;
+        isVerticalScroll = false;
+      }
+    }
+    if (isVerticalScroll) return;
     e.preventDefault();
     dragPct = getPct(e);
     if (dragRaf) cancelAnimationFrame(dragRaf);
@@ -862,10 +878,18 @@ body {
   function onDragEnd() {
     if (!isDragging) return;
     isDragging = false;
-    audio.currentTime = dragPct * (audio.duration || 0);
+    if (!isVerticalScroll) {
+      audio.currentTime = dragPct * (audio.duration || 0);
+    }
   }
-  progressBar.addEventListener('mousedown', (e) => { isDragging = true; dragPct = getPct(e); applyDrag(); });
-  progressBar.addEventListener('touchstart', (e) => { isDragging = true; dragPct = getPct(e); applyDrag(); }, { passive: true });
+  progressBar.addEventListener('mousedown', (e) => {
+    isDragging = true; dragPct = getPct(e); applyDrag();
+    startX = e.clientX; startY = e.clientY; dragDecided = false; isVerticalScroll = false;
+  });
+  progressBar.addEventListener('touchstart', (e) => {
+    isDragging = true; dragPct = getPct(e); applyDrag();
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY; dragDecided = false; isVerticalScroll = false;
+  }, { passive: true });
   document.addEventListener('mousemove', onDragMove);
   document.addEventListener('touchmove', onDragMove, { passive: false });
   document.addEventListener('mouseup', onDragEnd);
