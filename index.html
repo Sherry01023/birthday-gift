@@ -397,12 +397,29 @@ body {
   border-top: 1px solid rgba(255,255,255,0.06);
   margin-top: 12px;
 }
+.comment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
 .comment-title {
   font-size: 14px;
   color: var(--text-dim);
-  margin-bottom: 12px;
   font-weight: 300;
 }
+.comment-clear {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+.comment-clear:active { color: #e74c3c; }
 .comment-input-wrap {
   display: flex;
   gap: 8px;
@@ -549,7 +566,10 @@ body {
 
     <!-- Comment section -->
     <div class="comment-section">
-      <div class="comment-title">留下你想说的话 💌</div>
+      <div class="comment-header">
+        <div class="comment-title">留下你想说的话 💌</div>
+        <button class="comment-clear" id="commentClear">清空</button>
+      </div>
       <div class="comment-input-wrap">
         <textarea class="comment-input" id="commentInput" placeholder="写点什么..." rows="1"></textarea>
         <button class="comment-send" id="commentSend">
@@ -846,6 +866,13 @@ body {
   commentInput.addEventListener('input', () => {
     commentInput.style.height = 'auto';
     commentInput.style.height = Math.min(commentInput.scrollHeight, 100) + 'px';
+  });
+
+  document.getElementById('commentClear').addEventListener('click', () => {
+    if (confirm('确定清空所有评论？')) {
+      localStorage.removeItem(STORAGE_KEY);
+      renderComments();
+    }
   });
 
   renderComments();
