@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Music Player</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -20,13 +20,13 @@ html {
 }
 body {
   width:100%;
-  min-height:100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  margin:0;
+  overflow: scroll;
   -webkit-overflow-scrolling: touch;
   background: var(--bg);
   font-family: 'Outfit', sans-serif;
   color: var(--text);
+  touch-action: pan-y;
 }
 
 /* Background image layer */
@@ -48,7 +48,6 @@ body {
   flex-direction: column;
   position: relative;
   z-index: 1;
-  min-height: 100vh;
 }
 
 /* Turntable */
