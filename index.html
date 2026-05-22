@@ -898,6 +898,7 @@ body {
     if (!isDragging) return;
     isDragging = false;
     if (!isVerticalScroll) {
+      lyricIdx = -1;
       audio.currentTime = dragPct * (audio.duration || 0);
     }
   }
