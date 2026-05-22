@@ -819,6 +819,7 @@ body {
   }
 
   audio.addEventListener('timeupdate', () => {
+    if (ignoreTimeUpdate) return;
     const t = audio.currentTime;
     const d = audio.duration || 1;
     progressFill.style.width = (t / d * 100) + '%';
@@ -850,6 +851,7 @@ body {
   let dragPct = 0;
   let dragRaf = null;
   let startX = 0, startY = 0, dragDecided = false, isVerticalScroll = false;
+  let ignoreTimeUpdate = false;
   function getPct(e) {
     const rect = progressBar.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -861,17 +863,7 @@ body {
     const d = audio.duration || 1;
     const t = dragPct * d;
     currentTimeEl.textContent = formatTime(t);
-    // Update lyrics in sync during drag
-    let idx = -1;
-    for (let i = lyrics.length - 1; i >= 0; i--) {
-      if (t >= lyrics[i].time) { idx = i; break; }
-    }
-    if (idx !== lyricIdx) {
-      lyricIdx = idx;
-      document.getElementById('lyricPrev').textContent = idx > 0 ? lyrics[idx - 1]?.text : '';
-      document.getElementById('lyricCurrent').textContent = lyrics[idx]?.text || '...';
-      document.getElementById('lyricNext').textContent = idx < lyrics.length - 1 ? lyrics[idx + 1]?.text : '';
-    }
+    updateLyrics(t);
   }
   function onDragMove(e) {
     if (!isDragging) return;
@@ -903,14 +895,18 @@ body {
       audio.currentTime = t;
       lyricIdx = -1;
       updateLyrics(t);
+      // Resume timeupdate after a short delay
+      setTimeout(() => { ignoreTimeUpdate = false; }, 200);
+    } else {
+      ignoreTimeUpdate = false;
     }
   }
   progressBar.addEventListener('mousedown', (e) => {
-    isDragging = true; dragPct = getPct(e); applyDrag();
+    isDragging = true; ignoreTimeUpdate = true; dragPct = getPct(e); applyDrag();
     startX = e.clientX; startY = e.clientY; dragDecided = false; isVerticalScroll = false;
   });
   progressBar.addEventListener('touchstart', (e) => {
-    isDragging = true; dragPct = getPct(e); applyDrag();
+    isDragging = true; ignoreTimeUpdate = true; dragPct = getPct(e); applyDrag();
     startX = e.touches[0].clientX; startY = e.touches[0].clientY; dragDecided = false; isVerticalScroll = false;
   }, { passive: true });
   document.addEventListener('mousemove', onDragMove);
