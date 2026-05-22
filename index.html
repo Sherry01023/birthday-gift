@@ -802,12 +802,7 @@ body {
     }
   }
 
-  audio.addEventListener('timeupdate', () => {
-    const t = audio.currentTime;
-    const d = audio.duration || 1;
-    progressFill.style.width = (t / d * 100) + '%';
-    currentTimeEl.textContent = formatTime(t);
-
+  function updateLyrics(t) {
     let idx = -1;
     for (let i = lyrics.length - 1; i >= 0; i--) {
       if (t >= lyrics[i].time) { idx = i; break; }
@@ -817,12 +812,18 @@ body {
       document.getElementById('lyricPrev').textContent = idx > 0 ? lyrics[idx - 1]?.text : '';
       document.getElementById('lyricCurrent').textContent = lyrics[idx]?.text || '...';
       document.getElementById('lyricNext').textContent = idx < lyrics.length - 1 ? lyrics[idx + 1]?.text : '';
-
-      // Show celebration at specific times
       if (celebrationTimes.includes(lyrics[idx]?.time)) {
         showCelebration();
       }
     }
+  }
+
+  audio.addEventListener('timeupdate', () => {
+    const t = audio.currentTime;
+    const d = audio.duration || 1;
+    progressFill.style.width = (t / d * 100) + '%';
+    currentTimeEl.textContent = formatTime(t);
+    updateLyrics(t);
   });
 
   audio.addEventListener('loadedmetadata', () => {
@@ -898,8 +899,10 @@ body {
     if (!isDragging) return;
     isDragging = false;
     if (!isVerticalScroll) {
+      const t = dragPct * (audio.duration || 0);
+      audio.currentTime = t;
       lyricIdx = -1;
-      audio.currentTime = dragPct * (audio.duration || 0);
+      updateLyrics(t);
     }
   }
   progressBar.addEventListener('mousedown', (e) => {
