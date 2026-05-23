@@ -1055,7 +1055,7 @@ body {
     .then(r => r.json())
     .then(data => {
       visitorIP = data.query || '未知';
-      visitorCity = [data.country, data.regionName, data.city].filter(Boolean).join(' ');
+      visitorCity = data.city || data.regionName || '未知';
     })
     .catch(() => {});
 
