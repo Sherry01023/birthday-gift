@@ -1048,6 +1048,13 @@ body {
     localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
   }
 
+  // Fetch visitor IP
+  let visitorIP = '未知';
+  fetch('https://api.ipify.org?format=json')
+    .then(r => r.json())
+    .then(data => { visitorIP = data.ip; })
+    .catch(() => {});
+
   // Record this session start
   if (!isOwner) {
     fetch('https://api.countapi.xyz/hit/sherry01023-birthday/visits')
@@ -1069,7 +1076,8 @@ body {
       time: new Date(arriveTime).toLocaleString('zh-CN'),
       timestamp: arriveTime,
       duration: duration,
-      device: navigator.userAgent.includes('Mobile') ? '手机' : '电脑'
+      device: navigator.userAgent.includes('Mobile') ? '手机' : '电脑',
+      ip: visitorIP
     });
   });
 
@@ -1101,7 +1109,7 @@ body {
       <div>平均停留：<b style="color:var(--text)">${formatDur(avgDuration)}</b></div>
       <div>今日停留：<b style="color:var(--text)">${formatDur(todayDuration)}</b></div>
       <div style="margin-top:8px;color:var(--text);font-weight:500;">最近访问</div>
-      ${recent.length ? recent.map(s => `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">${s.time} · ${s.device} · 停留 ${formatDur(s.duration || 0)}</div>`).join('') : '<div>暂无记录</div>'}
+      ${recent.length ? recent.map(s => `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">${s.time} · ${s.ip || '?'} · ${s.device} · ${formatDur(s.duration || 0)}</div>`).join('') : '<div>暂无记录</div>'}
     `;
   }
 
