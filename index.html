@@ -1028,23 +1028,81 @@ body {
 
   renderComments();
 
-  // View counter
+  // View counter & session tracking
   const params = new URLSearchParams(window.location.search);
   const isOwner = params.get('admin') === 'birthday2026';
   const viewEl = document.getElementById('viewCount');
+  const SESSION_KEY = 'birthday_sessions';
+  const sessionId = Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+  const arriveTime = Date.now();
 
-  if (isOwner) {
-    // Owner: just read count, don't increment
-    fetch('https://api.countapi.xyz/get/sherry01023-birthday/visits')
-      .then(r => r.json())
-      .then(data => { viewEl.textContent = data.value || 0; })
-      .catch(() => { viewEl.textContent = '?'; });
-  } else {
-    // Visitor: increment and show
+  function getSessions() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY)) || []; }
+    catch { return []; }
+  }
+  function saveSession(entry) {
+    const sessions = getSessions();
+    sessions.push(entry);
+    // Keep last 200 sessions
+    if (sessions.length > 200) sessions.splice(0, sessions.length - 200);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+  }
+
+  // Record this session start
+  if (!isOwner) {
     fetch('https://api.countapi.xyz/hit/sherry01023-birthday/visits')
       .then(r => r.json())
       .then(data => { viewEl.textContent = data.value || 0; })
       .catch(() => { viewEl.textContent = '?'; });
+  } else {
+    fetch('https://api.countapi.xyz/get/sherry01023-birthday/visits')
+      .then(r => r.json())
+      .then(data => { viewEl.textContent = data.value || 0; })
+      .catch(() => { viewEl.textContent = '?'; });
+  }
+
+  // Record session end on leave
+  window.addEventListener('beforeunload', () => {
+    const duration = Math.round((Date.now() - arriveTime) / 1000);
+    saveSession({
+      id: sessionId,
+      time: new Date(arriveTime).toLocaleString('zh-CN'),
+      timestamp: arriveTime,
+      duration: duration,
+      device: navigator.userAgent.includes('Mobile') ? '手机' : '电脑'
+    });
+  });
+
+  // Admin panel
+  if (isOwner) {
+    const panel = document.createElement('div');
+    panel.style.cssText = 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin:10px 0;font-size:12px;color:var(--text-dim);line-height:1.8;';
+    document.querySelector('.song-info').after(panel);
+
+    const sessions = getSessions();
+    const today = new Date().toDateString();
+    const todaySessions = sessions.filter(s => new Date(s.timestamp).toDateString() === today);
+    const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const avgDuration = sessions.length ? Math.round(totalDuration / sessions.length) : 0;
+    const todayDuration = todaySessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+
+    function formatDur(sec) {
+      if (sec < 60) return sec + '秒';
+      return Math.floor(sec / 60) + '分' + (sec % 60) + '秒';
+    }
+
+    // Get latest 5 sessions
+    const recent = sessions.slice(-5).reverse();
+
+    panel.innerHTML = `
+      <div style="color:var(--text);font-weight:500;margin-bottom:6px;">📊 访问统计</div>
+      <div>总浏览：<b style="color:var(--text)">${sessions.length}</b> 次</div>
+      <div>今日浏览：<b style="color:var(--text)">${todaySessions.length}</b> 次</div>
+      <div>平均停留：<b style="color:var(--text)">${formatDur(avgDuration)}</b></div>
+      <div>今日停留：<b style="color:var(--text)">${formatDur(todayDuration)}</b></div>
+      <div style="margin-top:8px;color:var(--text);font-weight:500;">最近访问</div>
+      ${recent.length ? recent.map(s => `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">${s.time} · ${s.device} · 停留 ${formatDur(s.duration || 0)}</div>`).join('') : '<div>暂无记录</div>'}
+    `;
   }
 
 })();
