@@ -1051,13 +1051,22 @@ body {
   // Fetch visitor IP & location
   let visitorIP = '未知';
   let visitorCity = '未知';
-  fetch('https://ip-api.com/json/?fields=query,country,regionName,city')
+  fetch('https://ipapi.co/json/')
     .then(r => r.json())
     .then(data => {
-      visitorIP = data.query || '未知';
-      visitorCity = data.city || data.regionName || '未知';
+      visitorIP = data.ip || '未知';
+      visitorCity = data.city || data.region || '未知';
     })
-    .catch(() => {});
+    .catch(() => {
+      // Fallback API
+      fetch('https://ipwho.is/')
+        .then(r => r.json())
+        .then(data => {
+          visitorIP = data.ip || '未知';
+          visitorCity = data.city || '未知';
+        })
+        .catch(() => {});
+    });
 
   // Record this session start
   if (!isOwner) {
