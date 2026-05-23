@@ -1024,20 +1024,20 @@ body {
   // View counter
   const params = new URLSearchParams(window.location.search);
   const isOwner = params.get('admin') === 'birthday2026';
-  const VIEW_KEY = 'birthday_view_count';
-  const OWNER_KEY = 'birthday_owner_seen';
+  const viewEl = document.getElementById('viewCount');
 
-  if (!isOwner) {
-    // Count this visit
-    let count = parseInt(localStorage.getItem(VIEW_KEY) || '0', 10);
-    count++;
-    localStorage.setItem(VIEW_KEY, count);
-    document.getElementById('viewCount').textContent = count;
+  if (isOwner) {
+    // Owner: just read count, don't increment
+    fetch('https://api.countapi.xyz/get/sherry01023-birthday/visits')
+      .then(r => r.json())
+      .then(data => { viewEl.textContent = data.value || 0; })
+      .catch(() => { viewEl.textContent = '?'; });
   } else {
-    // Owner mode: show count but don't increment
-    localStorage.setItem(OWNER_KEY, '1');
-    let count = parseInt(localStorage.getItem(VIEW_KEY) || '0', 10);
-    document.getElementById('viewCount').textContent = count;
+    // Visitor: increment and show
+    fetch('https://api.countapi.xyz/hit/sherry01023-birthday/visits')
+      .then(r => r.json())
+      .then(data => { viewEl.textContent = data.value || 0; })
+      .catch(() => { viewEl.textContent = '?'; });
   }
 
 })();
