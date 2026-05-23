@@ -1048,11 +1048,15 @@ body {
     localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
   }
 
-  // Fetch visitor IP
+  // Fetch visitor IP & location
   let visitorIP = '未知';
-  fetch('https://api.ipify.org?format=json')
+  let visitorCity = '未知';
+  fetch('https://ip-api.com/json/?fields=query,country,regionName,city')
     .then(r => r.json())
-    .then(data => { visitorIP = data.ip; })
+    .then(data => {
+      visitorIP = data.query || '未知';
+      visitorCity = [data.country, data.regionName, data.city].filter(Boolean).join(' ');
+    })
     .catch(() => {});
 
   // Record this session start
@@ -1077,7 +1081,8 @@ body {
       timestamp: arriveTime,
       duration: duration,
       device: navigator.userAgent.includes('Mobile') ? '手机' : '电脑',
-      ip: visitorIP
+      ip: visitorIP,
+      city: visitorCity
     });
   });
 
@@ -1109,7 +1114,7 @@ body {
       <div>平均停留：<b style="color:var(--text)">${formatDur(avgDuration)}</b></div>
       <div>今日停留：<b style="color:var(--text)">${formatDur(todayDuration)}</b></div>
       <div style="margin-top:8px;color:var(--text);font-weight:500;">最近访问</div>
-      ${recent.length ? recent.map(s => `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">${s.time} · ${s.ip || '?'} · ${s.device} · ${formatDur(s.duration || 0)}</div>`).join('') : '<div>暂无记录</div>'}
+      ${recent.length ? recent.map(s => `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:4px;">${s.time} · ${s.city || s.ip || '?'} · ${s.device} · ${formatDur(s.duration || 0)}</div>`).join('') : '<div>暂无记录</div>'}
     `;
   }
 
